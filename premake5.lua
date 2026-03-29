@@ -27,7 +27,7 @@ project "Log-Puller"
 
     includedirs {
         "include",
-        "vendor/nlohmann"   -- ← add this
+        "vendor"
     }
 
     filter "configurations:Debug"
