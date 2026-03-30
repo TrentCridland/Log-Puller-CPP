@@ -3,6 +3,7 @@
 
 #include "Config.h"
 #include "Util.h"
+#include "Puller.h"
 
 #include <iostream>
 #include <string>

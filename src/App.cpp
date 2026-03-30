@@ -43,7 +43,7 @@ void App::RunApp() {
 }
 
 void App::RunPull() {
-
+    Puller::PullLatestLog();
 }
 
 void App::RunSet() {
