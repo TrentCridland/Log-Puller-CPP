@@ -27,8 +27,8 @@ namespace Util {
         }
 
         int teamNum = std::stoi(TeamNumber);
-        if (teamNum <= 0 || teamNum > 9999) {
-            throw std::out_of_range("Team number must be between 1 and 9999.");
+        if (teamNum <= 0 || teamNum > 25599) {
+            throw std::out_of_range("Team number must be between 1 and 25599.");
         }
 
         // Extract TE and AM parts
