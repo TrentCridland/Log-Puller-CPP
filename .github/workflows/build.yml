@@ -1,0 +1,88 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # required to create releases
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install dependencies per OS
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install make
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: choco install mingw -y
+
+      # Get premake binary (faster than building it)
+      - name: Download Premake
+        run: |
+          curl -L https://github.com/premake/premake-core/releases/latest/download/premake-5.0.0-beta8-${{ runner.os == 'Windows' && 'windows' || runner.os == 'macOS' && 'macosx' || 'linux' }}.tar.gz -o premake.tar.gz
+          tar -xzf premake.tar.gz
+        shell: bash
+
+      - name: Add Premake to PATH
+        run: echo "$PWD" >> $GITHUB_PATH
+        shell: bash
+
+      # Generate makefiles
+      - name: Generate project
+        run: premake5 gmake2
+
+      # Build
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: make config=release
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: mingw32-make config=release
+
+      # Package
+      - name: Package
+        run: |
+          mkdir dist
+          cp -r bin/Release/* dist/ || true
+        shell: bash
+
+      # Upload artifacts
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Log-Puller-${{ runner.os }}
+          path: dist/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*

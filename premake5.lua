@@ -15,7 +15,7 @@ filter "system:macosx"
 project "Log-Puller"
     kind "ConsoleApp"
     language "C++"
-    cppdialect "C++23"
+    cppdialect "C++20"
 
     targetdir ("bin/%{cfg.buildcfg}")
     objdir ("bin-int/%{cfg.buildcfg}")
